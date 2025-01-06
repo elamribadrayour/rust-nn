@@ -86,4 +86,3 @@ This project is licensed under the WTFPL license [LICENSE](LICENSE).
 - **Name:** El Amri Badr Ayour
 - **Email:** [badrayour.elamri@protonmail.com](mailto:badrayour.elamri@protonmail.com)
 - **GitHub:** [elamribadrayour](https://github.com/elamribadrayour)
-

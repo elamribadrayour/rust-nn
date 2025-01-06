@@ -175,14 +175,13 @@ fn test_network_train_xor() {
         vec![1.0, 0.0],
         vec![1.0, 1.0],
     ];
-    let xor_outputs = vec![
-        vec![0.0],
-        vec![1.0],
-        vec![1.0],
-        vec![0.0],
-    ];
+    let xor_outputs = vec![vec![0.0], vec![1.0], vec![1.0], vec![0.0]];
 
-    let dataset: Vec<(Vec<f64>, Vec<f64>)> = xor_inputs.iter().cloned().zip(xor_outputs.iter().cloned()).collect();
+    let dataset: Vec<(Vec<f64>, Vec<f64>)> = xor_inputs
+        .iter()
+        .cloned()
+        .zip(xor_outputs.iter().cloned())
+        .collect();
     network.train(&dataset);
 
     for (inputs, target) in xor_inputs.iter().zip(xor_outputs.iter()) {

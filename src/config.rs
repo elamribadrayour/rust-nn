@@ -14,7 +14,6 @@ pub struct ConfigLayer {
     pub activation: String,
 }
 
-
 impl Config {
     pub fn new(path: &str) -> Self {
         let file = std::fs::File::open(path).expect("Unable to open file");

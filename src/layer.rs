@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use rand::RngCore;
 
 use crate::activation::{get_activation, Activation};
@@ -12,7 +14,7 @@ pub struct Layer {
 impl Layer {
     pub fn new(rng: &mut dyn RngCore, config: &ConfigLayer) -> Self {
         Self {
-            activation: get_activation(&config.activation),
+            activation: get_activation(&config.activation, HashMap::new()),
             neurons: (0..config.output_size)
                 .map(|_| Neuron::new(rng, config.input_size))
                 .collect(),
