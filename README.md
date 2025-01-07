@@ -5,17 +5,36 @@
 ## Features
 
 - Define custom neural network architectures
-- Support for different activation functions (e.g., ReLU, Sigmoid)
+- Support for different activation functions (e.g., ReLU, Sigmoid, Tanh)
 - Train networks using backpropagation
 - Serialize and deserialize network configurations
+- Log training metrics such as loss and accuracy
 
 ## Installation
 
-To use `rust-nn` in your project, add the following to your `Cargo.toml`:
+To use `rust-nn`, you need to clone the repository and build the project:
+
+### Clone the Repository
+
+```
+git clone https://github.com/elamribadrayour/rust-nn.git
+cd rust-nn
+```
+
+### Build the Project
+
+Build the project using Cargo:
 
 ```bash
-[dependencies]
-rust-nn = "0.1.0"
+cargo build --release
+```
+
+### Run Tests
+
+To ensure everything is working correctly, run the tests:
+
+```bash
+cargo test
 ```
 
 ## Usage
@@ -23,19 +42,18 @@ rust-nn = "0.1.0"
 Here's a basic example of how to create and train a neural network using `rust-nn`:
 
 ```rust
-
-use rand::SeedableRng;
-use rand_chacha::ChaCha8Rng;
-
 use rust_nn::network::Network;
 use rust_nn::config::{Config, ConfigLayer};
 
 fn main() {
-    let mut rng = ChaCha8Rng::seed_from_u64(42);
-
     let config = Config {
         epochs: 1000,
-        learning_rate: 0.1,
+        lr: 0.1,
+        loss: "mse".to_string(),
+        initialization: ConfigInitialization {
+            method: "zero-centered".to_string(),
+            seed: Some(42),
+        },
         layers: vec![
             ConfigLayer {
                 input_size: 2,
@@ -45,30 +63,23 @@ fn main() {
             ConfigLayer {
                 input_size: 2,
                 output_size: 1,
-                activation: "relu".to_string(),
+                activation: "sigmoid".to_string(),
             },
         ],
     };
 
-    let mut network = Network::new(&mut rng, config);
+    let mut network = Network::new(config);
 
-    let xor_inputs = vec![
-        vec![0.0, 0.0],
-        vec![0.0, 1.0],
-        vec![1.0, 0.0],
-        vec![1.0, 1.0],
-    ];
-    let xor_outputs = vec![
-        vec![0.0],
-        vec![1.0],
-        vec![1.0],
-        vec![0.0],
+    let dataset = vec![
+        (vec![0.0, 0.0], vec![0.0]),
+        (vec![0.0, 1.0], vec![1.0]),
+        (vec![1.0, 0.0], vec![1.0]),
+        (vec![1.0, 1.0], vec![0.0]),
     ];
 
-    let dataset: Vec<(Vec<f64>, Vec<f64>)> = xor_inputs.iter().cloned().zip(xor_outputs.iter().cloned()).collect();
     network.train(&dataset);
 
-    for (inputs, target) in xor_inputs.iter().zip(xor_outputs.iter()) {
+    for (inputs, target) in dataset.iter() {
         let target = target[0];
         let output = network.forward(inputs);
         let prediction = if output[0] > 0.5 { 1.0 } else { 0.0 };
@@ -79,10 +90,8 @@ fn main() {
 
 ## License
 
-This project is licensed under the WTFPL license [LICENSE](LICENSE).
+This project is licensed under the WTFPL license. See the [LICENSE](LICENSE) file for details.
 
 ## Author
 
-- **Name:** El Amri Badr Ayour
 - **Email:** [badrayour.elamri@protonmail.com](mailto:badrayour.elamri@protonmail.com)
-- **GitHub:** [elamribadrayour](https://github.com/elamribadrayour)
