@@ -17,11 +17,15 @@ impl Multiquadratics {
 }
 
 impl Activation for Multiquadratics {
-    fn function(&self, x: f64) -> f64 {
-        ((x - self.mu).powi(2) + self.a.powi(2)).sqrt()
+    fn function(&self, x: &[f64]) -> Vec<f64> {
+        x.iter()
+            .map(|x| ((x - self.mu).powi(2) + self.a.powi(2)).sqrt())
+            .collect()
     }
 
-    fn derivative(&self, x: f64) -> f64 {
-        (x - self.mu) / ((x - self.mu).powi(2) + self.a.powi(2)).sqrt()
+    fn derivative(&self, x: &[f64]) -> Vec<f64> {
+        x.iter()
+            .map(|x| (x - self.mu) / ((x - self.mu).powi(2) + self.a.powi(2)).sqrt())
+            .collect()
     }
 }
