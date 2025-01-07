@@ -5,6 +5,7 @@ pub mod linear;
 pub mod multiquadratics;
 pub mod relu;
 pub mod sigmoid;
+pub mod tanh;
 pub mod utils;
 
 pub use crate::activation::activation_impl::Activation;
@@ -14,4 +15,5 @@ pub use crate::activation::linear::Linear;
 pub use crate::activation::multiquadratics::Multiquadratics;
 pub use crate::activation::relu::ReLU;
 pub use crate::activation::sigmoid::Sigmoid;
+pub use crate::activation::tanh::Tanh;
 pub use crate::activation::utils::get_activation;

@@ -17,12 +17,18 @@ impl Gaussian {
 }
 
 impl Activation for Gaussian {
-    fn function(&self, x: f64) -> f64 {
-        ((x - self.mu).powi(2) / (2.0 * self.sigma.powi(2))).exp()
+    fn function(&self, x: &[f64]) -> Vec<f64> {
+        x.iter()
+            .map(|x| ((x - self.mu).powi(2) / (2.0 * self.sigma.powi(2))).exp())
+            .collect()
     }
 
-    fn derivative(&self, x: f64) -> f64 {
-        -((x - self.mu) / self.sigma.powi(2))
-            * ((x - self.mu).powi(2) / (2.0 * self.sigma.powi(2))).exp()
+    fn derivative(&self, x: &[f64]) -> Vec<f64> {
+        x.iter()
+            .map(|x| {
+                -((x - self.mu) / self.sigma.powi(2))
+                    * ((x - self.mu).powi(2) / (2.0 * self.sigma.powi(2))).exp()
+            })
+            .collect()
     }
 }

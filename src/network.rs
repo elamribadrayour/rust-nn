@@ -1,17 +1,33 @@
-use rand::RngCore;
+use std::collections::HashMap;
 
-use crate::{config::Config, layer::Layer};
+use crate::config::Config;
+use crate::initialization::{get_initialization, Initialization};
+use crate::layer::Layer;
+use crate::logger::Logger;
+use crate::loss::{get_loss, Loss};
 
 pub struct Network {
     pub config: Config,
+    pub logger: Logger,
     pub layers: Vec<Layer>,
+    pub loss: Box<dyn Loss>,
+    pub initialization: Box<dyn Initialization>,
 }
 
 impl Network {
-    pub fn new(rng: &mut dyn RngCore, config: Config) -> Self {
+    pub fn new(config: Config) -> Self {
+        let mut initialization = get_initialization(&config.initialization);
+        let layers = config
+            .layers
+            .iter()
+            .map(|c| Layer::new(c, &mut initialization))
+            .collect();
         Self {
+            initialization,
+            logger: Logger::new(),
             config: config.clone(),
-            layers: config.layers.iter().map(|c| Layer::new(rng, c)).collect(),
+            loss: get_loss(config.loss.as_str(), HashMap::new()),
+            layers,
         }
     }
 
@@ -33,35 +49,27 @@ impl Network {
         outputs
     }
 
-    pub fn backward(&mut self, inputs: &[f64], target: &[f64], learning_rate: f64) {
+    pub fn backward(&mut self, lr: f64, inputs: &[f64], targets: &[f64]) {
+        // https://en.wikipedia.org/wiki/Backpropagation
+
         let activations = self.activations(inputs);
 
-        // Calculate the gradient of the loss with respect to the output of the network
-        // This is the initial gradient that will be backpropagated through the network
-        let mut output_grad = activations
-            .last()
-            .unwrap()
-            .iter()
-            .zip(target.iter())
-            .map(|(output, target)| output - target)
-            .collect::<Vec<f64>>();
+        let output = activations.last().unwrap();
+        let mut output_grad = self.loss.gradient(output, targets);
 
-        // Backward pass through each layer
-        self.layers
-            .iter_mut()
-            .enumerate()
-            .rev()
-            .for_each(|(i, layer)| {
-                let input = if i == 0 { inputs } else { &activations[i - 1] };
-                output_grad = layer.backward(input, &output_grad, learning_rate);
-            });
+        for (i, layer) in self.layers.iter_mut().enumerate().rev() {
+            let input = if i == 0 { inputs } else { &activations[i - 1] };
+            output_grad = layer.backward(lr, input, &output_grad);
+        }
     }
 
     pub fn train(&mut self, dataset: &[(Vec<f64>, Vec<f64>)]) {
-        for _ in 0..self.config.epochs {
-            for (inputs, target) in dataset.iter() {
-                self.forward(inputs);
-                self.backward(inputs, target, self.config.learning_rate);
+        for epoch in 0..self.config.epochs {
+            for (id, (inputs, targets)) in dataset.iter().enumerate() {
+                let outputs = self.forward(inputs);
+                let loss = self.loss.function(&outputs, targets);
+                self.backward(self.config.lr, inputs, targets);
+                self.logger.loss(epoch, id, loss);
             }
         }
     }
